@@ -7,7 +7,7 @@ import { Pokemonseleccionado } from './ruleta';
 interface MyVerticallyCenteredModalProps{
     show: boolean;
     onHide: () => void
-    pokemonseleccionado : Pokemonseleccionado | undefined
+    pokemonseleccionado : Pokemonseleccionado | undefined 
 }
 
 export const MyVerticallyCenteredModal: React.FC<MyVerticallyCenteredModalProps> = ({show, onHide, pokemonseleccionado}) => {
@@ -25,10 +25,45 @@ export const MyVerticallyCenteredModal: React.FC<MyVerticallyCenteredModalProps>
         </Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        <p>
-         <img src={pokemonseleccionado?.image} alt=""  width={250} height={250}/>
-        </p>
-        <h4>Centered Modal</h4>
+        <div>
+            <table>
+                <tr>
+                    <td> <img src={pokemonseleccionado?.image} alt=""  width={250} height={250}/>
+       </td>
+                    <td><h1>habilidades</h1>
+            <p>{pokemonseleccionado?.abilidad?.map(ability => ability.name).join(', ')}</p>
+            <br />
+           </td>
+                </tr>
+            </table>
+             
+            
+        </div>
+        <hr />
+        <div>
+    <table>
+        <thead>
+            <tr>
+                <th>Nombre del Movimiento</th>
+                <th>Tipo</th>
+            </tr>
+        </thead>
+        <tbody>
+            {pokemonseleccionado?.move?.filter((move, i) =>  i < 5).map((move, index) => (
+                <tr key={index}>
+                    <td>{move.name}</td>
+                    <td>
+                        <ul>
+                            {pokemonseleccionado.tipo[index]?.name && (
+                                <li key={index}>{pokemonseleccionado.tipo[index].name}</li>
+                            )}
+                        </ul>
+                    </td>
+                </tr>
+            ))}
+        </tbody>
+    </table>
+</div>
 
       </Modal.Body>
       <Modal.Footer>

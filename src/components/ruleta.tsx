@@ -5,6 +5,7 @@ import { PokemonData } from '../interfaces/pokemon';
 import { MyVerticallyCenteredModal } from './modal';
 import { Button } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import { url } from 'inspector';
 
 
 
@@ -23,11 +24,32 @@ interface ImageProps {
 interface Option {
   option: string;
   image: ImagePropsLocal;
+  abilidad: Ability[];
+  move: Move[];
+  type: Type[];
+
+}
+interface Type {
+  name: string;
+  url: string;
+}
+
+interface Ability {
+  name: string;
+  url: string;
+}
+
+interface Move {
+  name: string;
+  url: string;
 }
 
 export interface Pokemonseleccionado{
   option: string;
   image: string;
+  abilidad: Ability[];
+  move: Move[];
+  tipo: Type[];
 }
 
 export const Ruleta: React.FC = () => {
@@ -41,14 +63,42 @@ export const Ruleta: React.FC = () => {
   useEffect(() => {
     const obtenerInfo = async () => {
       try {
-        const pokemones = await axios.get<{ results: { name: string; url: string }[] }>('https://pokeapi.co/api/v2/pokemon?limit=10&offset=0');
+        const pokemones = await axios.get<{ results: { name: string; url: string;}[] }>('https://pokeapi.co/api/v2/pokemon?limit=20&offset=0');
         const opcionespokemon: Option[] = [];
-
+        const pokemonabilidades: Ability[] = [];
+        const pokemonmovimientos: Move[] = [];
+        const pokemontipo: Type[] = [];
         await Promise.all(pokemones.data.results.map(async (pokemon) => {
           const datapokemon = await axios.get<PokemonData>(pokemon.url);
+
+          datapokemon.data.abilities.map(abilidad=>{
+            pokemonabilidades.push({
+             name: abilidad.ability.name,
+             url: abilidad.ability.url,
+            })
+          })
+
+          datapokemon.data.moves.map(movimiento=>{
+            pokemonmovimientos.push({
+              name: movimiento.move.name,
+              url: movimiento.move.url
+            })
+          })
+          
+          datapokemon.data.types.map(tipo=>{
+            pokemontipo.push({
+              name: tipo.type.name,
+              url: tipo.type.url
+            })
+          })
+
           opcionespokemon.push({
             option: datapokemon.data.name,
-            image: { uri: datapokemon.data.sprites.front_default }
+            image: { uri: datapokemon.data.sprites.front_default },
+            abilidad: pokemonabilidades,
+            move: pokemonmovimientos,
+            type: pokemontipo
+            
           });
         }));
 
@@ -71,8 +121,11 @@ export const Ruleta: React.FC = () => {
       const mapeo = opcionpokemon.find((_, i) => i == newPrizeNumber )
       setPokemonseleccionado({
         option:mapeo?.option ?? "",
-        image:mapeo?.image.uri ?? ""
-      })
+        image:mapeo?.image.uri ?? "",
+        abilidad:mapeo?.abilidad?? [],
+        move:mapeo?.move?? [],
+        tipo:mapeo?.type?? [],
+          })
       console.log(mapeo)
       setMustSpin(true);
 
@@ -81,6 +134,8 @@ export const Ruleta: React.FC = () => {
 
   return (
     <>
+          <div className="ruleta-container">
+
     <div> <MyVerticallyCenteredModal pokemonseleccionado={pokemonseleccionado} show={show} onHide={() => setUnshow(false)}/>
     {/* <Button variant="primary" onClick={() => setUnshow(true)}>
         Launch vertically centered modal
@@ -101,12 +156,15 @@ export const Ruleta: React.FC = () => {
             setMustSpin(false);
             setUnshow(true)
           }}
+          
         />
       ) : (
         <div>Cargando...</div>
       )}
 
       <button onClick={handleSpinClick}>SPIN</button>
+      </div>
+
     </>
   );
 };
